@@ -1,10 +1,8 @@
-﻿using eCommerceWebProj.DataAccess;
-using eCommerceWebProj.DataAccess.Repository;
-using eCommerceWebProj.DataAccess.Repository.IRepository;
+﻿using eCommerceWebProj.DataAccess.Repository.IRepository;
 using eCommerceWebProj.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace eCommerceWebProj.Controllers
+namespace eCommerceWebProj.Areas.Admin.Controllers
 {
     public class CategoryController : Controller
     {
@@ -43,17 +41,18 @@ namespace eCommerceWebProj.Controllers
                 _unitOfWork.Category.Add(obj);
                 _unitOfWork.Save();
                 TempData["success"] = "Category created successfully!";
-            return RedirectToAction("Index");
-            } 
+                return RedirectToAction("Index");
+            }
             return View(obj);
         }
 
 
-		// GET with Edit using ID
+        // GET with Edit using ID
         public IActionResult Edit(int? id)
         {
-            if (id == null || id == 0) { 
-            return NotFound();
+            if (id == null || id == 0)
+            {
+                return NotFound();
             }
             //var categoryFromDb = _db.Categories.Find(id);
             var categoryFromDbFirst = _unitOfWork.Category.GetFirstOrDefault(u => u.Id == id);
@@ -122,7 +121,7 @@ namespace eCommerceWebProj.Controllers
             _unitOfWork.Save();
             TempData["success"] = "Category deleted successfully!";
             return RedirectToAction("Index");
-            
+
         }
     }
 }
