@@ -1,6 +1,8 @@
 ﻿using eCommerceWebProj.DataAccess.Repository.IRepository;
 using eCommerceWebProj.Models;
+using eCommerceWebProj.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace eCommerceWebProj.Areas.Admin.Controllers
 {
@@ -18,52 +20,71 @@ namespace eCommerceWebProj.Areas.Admin.Controllers
             return View(objCoverTypeList);
         }
 
-        // GET
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(CoverType obj)
-        {
-
-            // in .NET Core we have this method to check validation
-            if (ModelState.IsValid)
-            {
-                _unitOfWork.CoverType.Add(obj);
-                _unitOfWork.Save();
-                TempData["success"] = "Category created successfully!";
-                return RedirectToAction("Index");
-            }
-            return View(obj);
-        }
-
 
         // GET with Edit using ID
-        public IActionResult Edit(int? id)
+        // using one action method to handle both create and edit
+        public IActionResult Upsert(int? id)
         {
-            if (id == null || id == 0)
+
+            //Product product = new();
+            //// SelectListItem is from ASP.Net MVC Rendering 
+            //IEnumerable<SelectListItem> CategoryList = _unitOfWork.Category.GetAll().Select(
+            //	u => new SelectListItem
+            //	{
+            //		Text = u.Name,
+            //		Value = u.Id.ToString()
+            //	}
+            //);
+            //IEnumerable<SelectListItem> CoverTypeList = _unitOfWork.CoverType.GetAll().Select(
+            //	u => new SelectListItem
+            //	{
+            //		Text = u.Name,
+            //		Value = u.Id.ToString()
+            //	}
+            //);
+
+            ProductVM productVM = new()
             {
-                return NotFound();
-            }
-            var coverTypeFromDbFirst = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == id);
+                Product = new(),
+                CategoryList = _unitOfWork.Category.GetAll().Select(
+                    i => new SelectListItem
+                    {
+                        Text = i.Name,
+                        Value = i.Id.ToString()
+                    }
+                    ),
+                CoverTypeList = _unitOfWork.CoverType.GetAll().Select(
+                    i => new SelectListItem
+                    {
+                        Text = i.Name,
+                        Value = i.Id.ToString()
+                    })
+            };
 
 
-            if (coverTypeFromDbFirst == null)
+			if (id == null || id == 0)
             {
-                return NotFound();
+                // --- create product ---
+                //// ViewBag
+                //ViewBag.CategoryList = CategoryList;
+                //// ViewData
+                //ViewData["CoverTypeList"] = CoverTypeList;
+                
+                return View(productVM);
+            } 
+            else
+            {
+                // update product
             }
 
-            return View(coverTypeFromDbFirst);
+
+            return View(productVM);
         }
 
         // POST with Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(CoverType obj)
+        public IActionResult Upsert(CoverType obj)
         {
             // in .NET Core we have this method to check validation
             if (ModelState.IsValid)
