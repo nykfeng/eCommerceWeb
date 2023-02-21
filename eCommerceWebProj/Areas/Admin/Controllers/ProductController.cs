@@ -104,7 +104,6 @@ namespace eCommerceWebProj.Areas.Admin.Controllers
                     if (obj.Product.ImageUrl != null)
                     {
                         var oldImagePath = Path.Combine(wwwRootPath, obj.Product.ImageUrl.TrimStart('\\'));
-                        Console.WriteLine("oldImagePath: "+ oldImagePath);
                         if (System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath);
@@ -132,40 +131,40 @@ namespace eCommerceWebProj.Areas.Admin.Controllers
             return View(obj);
         }
 
-        // GET using ID
-        public IActionResult Delete(int? id)
-        {
-            if (id == null || id == 0)
-            {
-                return NotFound();
-            }
-            var coverTypeFromDbFirst = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == id);
+        //// GET using ID
+        //public IActionResult Delete(int? id)
+        //{
+        //    if (id == null || id == 0)
+        //    {
+        //        return NotFound();
+        //    }
+        //    var coverTypeFromDbFirst = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == id);
 
-            if (coverTypeFromDbFirst == null)
-            {
-                return NotFound();
-            }
+        //    if (coverTypeFromDbFirst == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(coverTypeFromDbFirst);
-        }
+        //    return View(coverTypeFromDbFirst);
+        //}
 
-        // POST with Delete
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public IActionResult DeletePOST(int? id)
-        {
-            var coverTypeFromDbFirst = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == id);
-            if (coverTypeFromDbFirst == null)
-            {
-                return NotFound();
-            }
+        //// POST with Delete
+        //[HttpPost, ActionName("Delete")]
+        //[ValidateAntiForgeryToken]
+        //public IActionResult DeletePOST(int? id)
+        //{
+        //    var coverTypeFromDbFirst = _unitOfWork.CoverType.GetFirstOrDefault(u => u.Id == id);
+        //    if (coverTypeFromDbFirst == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _unitOfWork.CoverType.Remove(coverTypeFromDbFirst);
-            _unitOfWork.Save();
-            TempData["success"] = "Category deleted successfully!";
-            return RedirectToAction("Index");
+        //    _unitOfWork.CoverType.Remove(coverTypeFromDbFirst);
+        //    _unitOfWork.Save();
+        //    TempData["success"] = "Category deleted successfully!";
+        //    return RedirectToAction("Index");
 
-        }
+        //}
 
 		#region API CALLS
 		[HttpGet]
@@ -173,6 +172,25 @@ namespace eCommerceWebProj.Areas.Admin.Controllers
 		{
 			var productList = _unitOfWork.Product.GetAll(includeProperties:"Category,CoverType");
             return Json(new { data = productList });
+		}
+
+		[HttpDelete]
+		public IActionResult Delete(int? id)
+		{
+            var productObj = _unitOfWork.Product.GetFirstOrDefault(u => u.Id == id);
+            if (productObj == null)
+            {
+                return Json(new { success = false, message = "Error while deleting!" });
+            }
+			var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, productObj.ImageUrl.TrimStart('\\'));
+			if (System.IO.File.Exists(oldImagePath))
+			{
+				System.IO.File.Delete(oldImagePath);
+			}
+
+            _unitOfWork.Product.Remove(productObj);
+            _unitOfWork.Save();
+			return Json(new { success = true, message = "Successfully Deleted!" });
 		}
 		#endregion
 
