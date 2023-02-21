@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -21,35 +22,49 @@ namespace eCommerceWebProj.Models
         public string Author { get; set; }
         [Required]
         [Range(1,10000)]
-        public double ListPrice { get; set; }
+		[Display(Name = "List Price")]
+		public double ListPrice { get; set; }
 
         [Required]
         [Range(1, 10000)]
-        public double Price { get; set; }
+		[Display(Name = "Price for 1-50")]
+		public double Price { get; set; }
 
         [Required]
         [Range(1, 10000)]
-        public double Price50 { get; set; }
+		[Display(Name = "Price for 50-100")]
+		public double Price50 { get; set; }
 
         [Required]
         [Range(1, 10000)]
-        public double Price100 { get; set; }
+		[Display(Name = "Price for 100+")]
+		public double Price100 { get; set; }
 
-        public string ImageUrl { get; set; }
+		[ValidateNever]
+		public string ImageUrl { get; set; }
 
         // foreign key, will automatically recognized 
         // it was able to be mapped because the 'Id' was appended
         [Required]
         [ForeignKey("Category")]
-        public int CategoryId { get; set; }
+		[Display(Name = "Category")]
+		public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
-        public Category Category { get; set; }
+		[ValidateNever]
+
+        // entity framework knows this is a foreign key,
+        // so it knows how to implement it for product index view page
+        // but when doing API calls, we need to do extra
+		public Category? Category { get; set; }
 
         // foreign key, will automatically recognized 
         [Required]
         [ForeignKey("CoverType")]
-        public int CoverTypeId { get; set; }
+        [Display(Name = "Cover Type")]
+
+		public int CoverTypeId { get; set; }
         [ForeignKey("CoverTypeId")]
-        public Category CoverType { get; set; }
+		[ValidateNever]
+		public Category? CoverType { get; set; }
     }
 }

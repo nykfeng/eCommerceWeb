@@ -9,15 +9,17 @@ namespace eCommerceWebProj.Areas.Admin.Controllers
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        // So to access the wwwroot folder
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductController(IUnitOfWork unitOfWork)
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment hostEnvironment)
         {
             _unitOfWork = unitOfWork;
+            _webHostEnvironment = hostEnvironment;
         }
         public IActionResult Index()
         {
-            IEnumerable<Product> objCoverTypeList = _unitOfWork.Product.GetAll();
-            return View(objCoverTypeList);
+            return View();
         }
 
 
@@ -62,36 +64,52 @@ namespace eCommerceWebProj.Areas.Admin.Controllers
             };
 
 
-			if (id == null || id == 0)
+            if (id == null || id == 0)
             {
                 // --- create product ---
                 //// ViewBag
                 //ViewBag.CategoryList = CategoryList;
                 //// ViewData
                 //ViewData["CoverTypeList"] = CoverTypeList;
-                
+
                 return View(productVM);
-            } 
+            }
             else
             {
                 // update product
-            }
+                // render the product's data
+                productVM.Product = _unitOfWork.Product.GetFirstOrDefault(u => u.Id== id);
+				return View(productVM);
+			}
 
 
-            return View(productVM);
+           
         }
 
         // POST with Edit
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Upsert(CoverType obj)
+        public IActionResult Upsert(ProductVM obj, IFormFile file)
         {
             // in .NET Core we have this method to check validation
             if (ModelState.IsValid)
             {
-                _unitOfWork.CoverType.Update(obj);
+                string wwwRootPath = _webHostEnvironment.WebRootPath;
+                if (file != null)
+                {
+                    string fileName = Guid.NewGuid().ToString();
+                    var uploads = Path.Combine(wwwRootPath, @"images\products");
+                    var extension = Path.GetExtension(file.FileName);
+
+                    using (var fileStreams = new FileStream(Path.Combine(uploads, fileName+extension), FileMode.Create))
+                    {
+                        file.CopyTo(fileStreams);
+                    }
+                    obj.Product.ImageUrl = @"\images\products\" + fileName + extension;
+                }
+                _unitOfWork.Product.Add(obj.Product);
                 _unitOfWork.Save();
-                TempData["success"] = "Category updated successfully!";
+                TempData["success"] = "Product created successfully!";
                 return RedirectToAction("Index");
             }
             return View(obj);
@@ -131,5 +149,15 @@ namespace eCommerceWebProj.Areas.Admin.Controllers
             return RedirectToAction("Index");
 
         }
-    }
+
+		#region API CALLS
+		[HttpGet]
+		public IActionResult GetAll()
+		{
+			var productList = _unitOfWork.Product.GetAll(includeProperties:"Category,CoverType");
+            return Json(new { data = productList });
+		}
+		#endregion
+
+	}
 }
