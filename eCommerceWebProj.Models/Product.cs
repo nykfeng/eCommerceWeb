@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -40,6 +41,7 @@ namespace eCommerceWebProj.Models
 		[Display(Name = "Price for 100+")]
 		public double Price100 { get; set; }
 
+		[BindNever]
 		[ValidateNever]
 		public string ImageUrl { get; set; }
 
