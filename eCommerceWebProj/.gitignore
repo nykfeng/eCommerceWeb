@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 #ignore custom images
 images/
+
+#ignore Bootstrap CSS themes
+bootswatchTheme.css
