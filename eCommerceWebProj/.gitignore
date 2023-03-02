@@ -367,3 +367,7 @@ images/
 
 #ignore Bootstrap CSS themes
 bootswatchTheme.css
+
+
+#appsetting with secret
+appsettings.json
